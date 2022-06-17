@@ -4,9 +4,7 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:injectable/injectable.dart';
 import 'package:meta/meta.dart';
-import 'package:rxdart/subjects.dart';
 
-import '../../../../../common/utils/dev_utils.dart';
 import '../../../../../common/utils/usecase.dart';
 import '../../../../../common/models/movie/movie.dart';
 import '../../../domain/usecases/fetch_favourites_usecase.dart';
@@ -26,10 +24,6 @@ class FavouritesBloc extends Bloc<FavouritesEvent, FavouritesState> {
   }
   final ToggleFavouriteUsecase _toggleFavouriteUsecase;
   final FetchFavouritesUsecase _fetchFavouritesUsecase;
-  final PublishSubject<int> _favouriteMovieIndexRemoved = PublishSubject<int>();
-
-  Stream<int> get favouriteMovieIndexRemoved =>
-      _favouriteMovieIndexRemoved.stream;
 
   Future<void> handleFetchFavouriteMovies(Emitter<FavouritesState> emit) async {
     final failureOrFavrites = await _fetchFavouritesUsecase.call(NoParams());
@@ -48,12 +42,7 @@ class FavouritesBloc extends Bloc<FavouritesEvent, FavouritesState> {
         .call(ToggleFavouriteParams(movie, isAllreadyFavourite));
     newFavouritesOrFailure.fold(
       (failure) => emit(const FavouritesError()),
-      (favourites) {
-        if (isAllreadyFavourite) {
-          _favouriteMovieIndexRemoved.add(favouriteMovieIndex);
-        }
-        emit(FavouritesLoaded(favourites));
-      },
+      (favourites) => emit(FavouritesLoaded(favourites)),
     );
   }
 }
