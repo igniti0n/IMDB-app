@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
 
 import '../../../common/constants/colors.dart';
 import '../../../common/utils/dev_utils.dart';
-import '../../movies_list/ui/pages/movies_page.dart';
 import '../widgets/app_nav_bar.dart';
 import '../widgets/home_body_view.dart';
 

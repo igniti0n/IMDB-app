@@ -1,13 +1,17 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
-import '../../constants/colors.dart';
-import '../../constants/fonts.dart';
+import '../../models/movie/movie.dart';
+import '../../navigation/routes.dart';
 import '../../utils/dev_utils.dart';
+import '../../../features/movies_list/ui/widgets/cached_image_movie_builder.dart';
+import '../cached_image/cached_image_error.dart';
+import '../cached_image/cached_image_placeholder.dart';
 import 'movie_header_widget.dart';
 
 class MovieWidget extends StatelessWidget {
-  const MovieWidget({super.key});
+  const MovieWidget({super.key, required this.movie});
+  final Movie movie;
 
   @override
   Widget build(BuildContext context) {
@@ -16,38 +20,31 @@ class MovieWidget extends StatelessWidget {
         horizontal: 20,
         vertical: 10,
       ),
-      child: Row(
-        children: [
-          Hero(
-            tag: 'imageHeroTag',
-            child: CachedNetworkImage(
-              imageUrl: urlForPosterImage('/aWeKITRFbbwY8txG5uCj4rMCfSP.jpg'),
+      child: GestureDetector(
+        onTap: () =>
+            Navigator.of(context).pushNamed(rDetailsPage, arguments: movie),
+        child: Row(
+          children: [
+            CachedNetworkImage(
+              imageUrl: urlForPosterImage(movie.posterPath),
               colorBlendMode: BlendMode.clear,
               filterQuality: FilterQuality.high,
-              placeholder: (context, url) => const CircularProgressIndicator(),
-              errorWidget: (context, url, error) => const Icon(Icons.error),
-              imageBuilder: (context, imageProvider) => Container(
-                clipBehavior: Clip.antiAlias,
-                width: 100,
-                height: 100,
-                decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.all(Radius.circular(2)),
-                  image: DecorationImage(
-                    filterQuality: FilterQuality.high,
-                    image: imageProvider,
-                    fit: BoxFit.fitWidth,
-                  ),
+              placeholder: (context, url) => const CachedImagePlaceholder(),
+              errorWidget: (context, url, error) => const CachedImageError(),
+              imageBuilder: (context, imageProvider) => CachedImageBuilder(
+                imageProvider: imageProvider,
+              ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(left: 16),
+                child: MovieHeaderWidget.forMoviesList(
+                  movieUi: movie,
                 ),
               ),
             ),
-          ),
-          const Expanded(
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(16, 0, 20, 0),
-              child: MovieHeaderWidget(),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

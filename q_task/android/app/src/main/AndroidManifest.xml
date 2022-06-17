@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.q_task">
+    package="com.app.q_task">
    <application
         android:label="q_task"
         android:name="${applicationName}"

@@ -5,6 +5,7 @@ import 'colors.dart';
 
 // ignore: avoid_classes_with_only_static_members
 class FontStyles {
+  // Semibold
   static TextStyle get semiBold12 => const TextStyle(
         fontWeight: FontWeight.w600,
         fontSize: 12,
@@ -19,6 +20,13 @@ class FontStyles {
     color: AppColors.qText,
   );
 
+  static TextStyle semiBold20 = const TextStyle(
+    fontWeight: FontWeight.w600,
+    fontSize: 20,
+    fontFamily: 'SfProDisplaySemiBold',
+    color: AppColors.qText,
+  );
+
   static TextStyle semiBold22 = const TextStyle(
     fontWeight: FontWeight.w600,
     fontSize: 22,
@@ -26,6 +34,7 @@ class FontStyles {
     color: AppColors.qText,
   );
 
+  // regular
   static TextStyle regular11 = const TextStyle(
     fontWeight: FontWeight.w400,
     fontSize: 11,
@@ -40,9 +49,17 @@ class FontStyles {
     color: AppColors.qText,
   );
 
+  // light
   static TextStyle light12 = const TextStyle(
     fontWeight: FontWeight.w300,
     fontSize: 12,
+    fontFamily: 'SfProRegular',
+    color: AppColors.qText,
+  );
+
+  static TextStyle light13 = const TextStyle(
+    fontWeight: FontWeight.w300,
+    fontSize: 13,
     fontFamily: 'SfProRegular',
     color: AppColors.qText,
   );

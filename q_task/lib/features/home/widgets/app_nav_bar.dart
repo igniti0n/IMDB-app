@@ -14,7 +14,7 @@ class AppNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     final padding = width / 8;
-    final indicatorWidth = 100;
+    const indicatorWidth = 100;
 
     return BlocBuilder<NavigationBarCubit, NavigationBarState>(
       builder: (ctx, state) {

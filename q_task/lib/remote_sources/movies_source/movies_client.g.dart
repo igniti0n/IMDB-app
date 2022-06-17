@@ -16,39 +16,37 @@ class _MoviesClient implements MoviesClient {
   String? baseUrl;
 
   @override
-  Future<List<Movie>> getMovies(language, thingName) async {
+  Future<MoviesResponse> getMovies(language, pageNumber) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
       r'language': language,
-      r'page': thingName
+      r'page': pageNumber
     };
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
-    final _result = await _dio.fetch<List<dynamic>>(_setStreamType<List<Movie>>(
-        Options(method: 'GET', headers: _headers, extra: _extra)
-            .compose(_dio.options, '/movie/popular',
-                queryParameters: queryParameters, data: _data)
-            .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
-    var value = _result.data!
-        .map((dynamic i) => Movie.fromJson(i as Map<String, dynamic>))
-        .toList();
+    final _result = await _dio.fetch<Map<String, dynamic>>(
+        _setStreamType<MoviesResponse>(
+            Options(method: 'GET', headers: _headers, extra: _extra)
+                .compose(_dio.options, '/movie/popular',
+                    queryParameters: queryParameters, data: _data)
+                .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final value = MoviesResponse.fromJson(_result.data!);
     return value;
   }
 
   @override
-  Future<List<Genre>> getGenres() async {
+  Future<GenresResponse> getGenres() async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
-    final _result = await _dio.fetch<List<dynamic>>(_setStreamType<List<Genre>>(
-        Options(method: 'GET', headers: _headers, extra: _extra)
-            .compose(_dio.options, '/genre/movie/list',
-                queryParameters: queryParameters, data: _data)
-            .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
-    var value = _result.data!
-        .map((dynamic i) => Genre.fromJson(i as Map<String, dynamic>))
-        .toList();
+    final _result = await _dio.fetch<Map<String, dynamic>>(
+        _setStreamType<GenresResponse>(
+            Options(method: 'GET', headers: _headers, extra: _extra)
+                .compose(_dio.options, '/genre/movie/list',
+                    queryParameters: queryParameters, data: _data)
+                .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final value = GenresResponse.fromJson(_result.data!);
     return value;
   }
 

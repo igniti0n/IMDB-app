@@ -12,10 +12,3 @@ class NavigationBarPageChanged extends NavigationBarState {
   @override
   List<Object?> get props => [currentlySelectedPage];
 }
-
-class NavigationBarPageChangedFromPageView extends NavigationBarState {
-  const NavigationBarPageChangedFromPageView(super.currentlySelectedPage);
-
-  @override
-  List<Object?> get props => [currentlySelectedPage];
-}

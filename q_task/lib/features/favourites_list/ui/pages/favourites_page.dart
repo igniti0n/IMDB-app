@@ -1,11 +1,13 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../common/constants/colors.dart';
 import '../../../../common/constants/fonts.dart';
-import '../../../../common/navigation/routes.dart';
-import '../../../../common/utils/dev_utils.dart';
 import '../../../../common/widgets/movie_widget/movie_widget.dart';
+import '../../../../common/models/movie/movie.dart';
+import '../blocs/bloc/favourites_bloc.dart';
 
 class FavouritesPage extends StatefulWidget {
   const FavouritesPage({super.key});
@@ -15,42 +17,41 @@ class FavouritesPage extends StatefulWidget {
 }
 
 class _FavouritesPageState extends State<FavouritesPage> {
-  static const _pageSize = 10;
-
-  final PagingController<int, String> _pagingController =
-      PagingController(firstPageKey: 0);
+  final _animatedListKey = GlobalKey<AnimatedListState>();
+  late final StreamSubscription<int> _favouriteMovieIndexRemovedSubscription;
 
   @override
   void initState() {
-    _pagingController.addPageRequestListener((pageKey) {
-      _fetchPage(pageKey);
+    _favouriteMovieIndexRemovedSubscription =
+        BlocProvider.of<FavouritesBloc>(context)
+            .favouriteMovieIndexRemoved
+            .listen((removedFavouriteIndex) {
+      _animatedListKey.currentState?.removeItem(removedFavouriteIndex,
+          (context, animation) => buildItem(removedFavouriteIndex, animation));
     });
     super.initState();
   }
 
   @override
   void dispose() {
-    _pagingController.dispose();
+    _favouriteMovieIndexRemovedSubscription.cancel();
+    _animatedListKey.currentState?.dispose();
     super.dispose();
   }
 
-  Future<void> _fetchPage(int pageKey) async {
-    safeLog('fetching pages');
-    try {
-      final newItems = List.generate(
-        _pageSize,
-        (index) => 'Item $pageKey-$index',
+  Widget buildItem(int index, Animation<double> animation) => AnimatedOpacity(
+        opacity: 1 - animation.value,
+        duration: const Duration(milliseconds: 500),
+        child: Container(
+          width: double.infinity,
+          height: 100,
+          color: AppColors.qSplashColor,
+        ),
       );
-      final isLastPage = newItems.length < _pageSize;
-      if (isLastPage) {
-        _pagingController.appendLastPage(newItems);
-      } else {
-        final nextPageKey = pageKey + newItems.length;
-        _pagingController.appendPage(newItems, nextPageKey);
-      }
-    } catch (error) {
-      _pagingController.error = error;
-    }
+
+  void removeItem(int index) {
+    _animatedListKey.currentState?.removeItem(
+        index, (context, animation) => MovieWidget(movie: Movie.empty()));
   }
 
   @override
@@ -58,7 +59,7 @@ class _FavouritesPageState extends State<FavouritesPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
             child: Text(
               'Favourites',
               style: FontStyles.semiBold22,
@@ -68,13 +69,19 @@ class _FavouritesPageState extends State<FavouritesPage> {
             height: 20,
           ),
           Expanded(
-            child: PagedListView<int, String>(
-              pagingController: _pagingController,
-              itemExtent: 120,
-              builderDelegate: PagedChildBuilderDelegate<String>(
-                itemBuilder: (ctx, item, index) => GestureDetector(
-                  onTap: () => Navigator.of(ctx).pushNamed(rDetailsPage),
-                  child: const MovieWidget(),
+            child: AnimatedList(
+              key: _animatedListKey,
+              initialItemCount: BlocProvider.of<FavouritesBloc>(context)
+                  .state
+                  .favouriteMovies
+                  .length,
+              itemBuilder: (ctx, index, animation) => ConstrainedBox(
+                constraints:
+                    const BoxConstraints(minHeight: 100, maxHeight: 120),
+                child: MovieWidget(
+                  movie: BlocProvider.of<FavouritesBloc>(context)
+                      .state
+                      .favouriteMovies[index],
                 ),
               ),
             ),

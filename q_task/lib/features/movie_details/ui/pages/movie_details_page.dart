@@ -1,58 +1,59 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 
 import '../../../../common/constants/colors.dart';
 import '../../../../common/utils/dev_utils.dart';
+import '../../../../common/models/movie/movie.dart';
+import '../../../../common/widgets/cached_image/cached_image_error.dart';
+import '../../../../common/widgets/cached_image/cached_image_placeholder.dart';
+import '../widgets/cached_image_movie_details_builder.dart';
+import '../widgets/movie_description_widget.dart';
+import '../widgets/movie_details_custom_bar.dart';
 
 class MovieDetailsPage extends StatelessWidget {
-  const MovieDetailsPage({super.key});
+  const MovieDetailsPage({super.key, required this.movie});
+  final Movie movie;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.qText,
+      backgroundColor: AppColors.qBackground,
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
+            automaticallyImplyLeading: false,
+            leadingWidth: 48,
+            leading: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 0, 20),
+              child: GestureDetector(
+                onTap: () => Navigator.pop(context),
+                child: SvgPicture.asset(
+                  pathForSvgAsset('arrow_back'),
+                ),
+              ),
+            ),
             backgroundColor: AppColors.qBackground,
             expandedHeight: 335,
+            bottom: MovieDetailsCustomBar(
+              movie: movie,
+            ),
             flexibleSpace: FlexibleSpaceBar(
-              background: Hero(
-                tag: 'imageHeroTag',
-                child: CachedNetworkImage(
-                  imageUrl:
-                      urlForPosterImage('/aWeKITRFbbwY8txG5uCj4rMCfSP.jpg'),
-                  colorBlendMode: BlendMode.clear,
-                  filterQuality: FilterQuality.high,
-                  placeholder: (context, url) =>
-                      const CircularProgressIndicator(),
-                  errorWidget: (context, url, error) => const Icon(Icons.error),
-                  imageBuilder: (context, imageProvider) => Container(
-                    clipBehavior: Clip.antiAlias,
-                    decoration: BoxDecoration(
-                      borderRadius: const BorderRadius.all(Radius.circular(2)),
-                      image: DecorationImage(
-                        filterQuality: FilterQuality.high,
-                        image: imageProvider,
-                        fit: BoxFit.fitWidth,
-                      ),
-                    ),
-                  ),
+              background: CachedNetworkImage(
+                imageUrl: urlForPosterImage(movie.posterPath),
+                colorBlendMode: BlendMode.clear,
+                filterQuality: FilterQuality.high,
+                placeholder: (context, url) => const CachedImagePlaceholder(),
+                errorWidget: (context, url, error) => const CachedImageError(),
+                imageBuilder: (context, imageProvider) =>
+                    CachedImageMovieDetailsBuilder(
+                  imageProvider: imageProvider,
                 ),
               ),
             ),
           ),
           SliverToBoxAdapter(
-            child: Container(
-              transform: Matrix4.translationValues(0, -20, 0),
-              height: 2000,
-              decoration: const BoxDecoration(
-                color: AppColors.qBackground,
-                borderRadius: BorderRadius.all(
-                  Radius.circular(20),
-                ),
-              ),
-            ),
+            child: MovieDescriptionWidget(description: movie.overview),
           )
         ],
       ),

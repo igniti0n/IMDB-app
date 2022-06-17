@@ -1,5 +1,5 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:injectable/injectable.dart';
-import 'package:connectivity/connectivity.dart';
 
 @module
 abstract class MainModule {

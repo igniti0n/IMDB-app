@@ -15,7 +15,13 @@ class HomeBodyView extends StatefulWidget {
 }
 
 class _HomeBodyViewState extends State<HomeBodyView> {
-  late final PageController _pageController = PageController();
+  late final PageController _pageController;
+
+  @override
+  void initState() {
+    _pageController = PageController();
+    super.initState();
+  }
 
   @override
   void dispose() {
@@ -32,7 +38,7 @@ class _HomeBodyViewState extends State<HomeBodyView> {
         controller: _pageController,
         onPageChanged: (newSelectedPage) =>
             BlocProvider.of<NavigationBarCubit>(context)
-                .scrollPage(newSelectedPage),
+                .changePage(newSelectedPage),
         itemBuilder: (BuildContext context, int index) {
           if (index == 0) {
             return const MoviesPage();
@@ -45,17 +51,10 @@ class _HomeBodyViewState extends State<HomeBodyView> {
   }
 
   void onNavBarSelectedPageChanged(NavigationBarState state) {
-    if (state is NavigationBarPageChanged) {
-      try {
-        final currenltyShowingPage = _pageController.page?.toInt() ?? 10;
-        if (currenltyShowingPage != state.currentlySelectedPage) {
-          _pageController.animateToPage(
-            state.currentlySelectedPage,
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeOut,
-          );
-        }
-      } catch (_) {}
-    }
+    _pageController.animateToPage(
+      state.currentlySelectedPage,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOut,
+    );
   }
 }

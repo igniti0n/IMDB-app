@@ -1,12 +1,17 @@
-import 'dart:math';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
-import '../../../../common/constants/colors.dart';
 import '../../../../common/constants/fonts.dart';
-import '../../../../common/navigation/routes.dart';
+import '../../../../common/errors/exception_to_failure_mapper.dart';
+import '../../../../common/errors/exceptions.dart';
 import '../../../../common/utils/dev_utils.dart';
 import '../../../../common/widgets/movie_widget/movie_widget.dart';
+import '../blocs/bloc/popular_movies_bloc.dart';
+import '../../../../common/models/movie/movie.dart';
+import '../widgets/movies_list_error.dart';
+import '../widgets/movies_list_no_items_message.dart';
 
 class MoviesPage extends StatefulWidget {
   const MoviesPage({super.key});
@@ -16,16 +21,17 @@ class MoviesPage extends StatefulWidget {
 }
 
 class _MoviesPageState extends State<MoviesPage> {
-  static const _pageSize = 10;
-
-  final PagingController<int, String> _pagingController =
+  final PagingController<int, Movie> _pagingController =
       PagingController(firstPageKey: 0);
+  late final StreamSubscription<bool> _internetConnectionSubscription;
 
   @override
   void initState() {
     _pagingController.addPageRequestListener((pageKey) {
-      _fetchPage(pageKey);
+      BlocProvider.of<PopularMoviesBloc>(context)
+          .add(FetchPopularMoviesEvent(pageKey));
     });
+    listenToInternetConnectionChanges();
     super.initState();
   }
 
@@ -35,52 +41,88 @@ class _MoviesPageState extends State<MoviesPage> {
     super.dispose();
   }
 
-  Future<void> _fetchPage(int pageKey) async {
-    safeLog('fetching pages');
-    try {
-      final newItems = List.generate(
-        _pageSize,
-        (index) => 'Item $pageKey-$index',
-      );
-      final isLastPage = newItems.length < _pageSize;
-      if (isLastPage) {
-        _pagingController.appendLastPage(newItems);
+  void listenToInternetConnectionChanges() {
+    _internetConnectionSubscription =
+        BlocProvider.of<PopularMoviesBloc>(context)
+            .internetConnectionState
+            .listen((bool isConnected) {
+      safeLog('!!!! Is connected: $isConnected  !!!!');
+      if (isConnected) {
+        _pagingController.retryLastFailedRequest();
       } else {
-        final nextPageKey = pageKey + newItems.length;
-        _pagingController.appendPage(newItems, nextPageKey);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(ExceptionToFailureMapper.mapExceptionToFailure(
+                    NoInternetException())
+                .message),
+          ),
+        );
       }
-    } catch (error) {
-      _pagingController.error = error;
+    });
+  }
+
+  void listenToPopularMoviesBloc(BuildContext ctx, PopularMoviesState state) {
+    if (state is PopularMoviesLoaded) {
+      final nextPageKey = _pagingController.nextPageKey ?? 0;
+      _pagingController.appendPage(
+          state.movies, nextPageKey + state.movies.length);
+    } else if (state is PopularMoviesError) {
+      _pagingController.error = state.failure;
+      ScaffoldMessenger.of(ctx).showSnackBar(
+        SnackBar(
+          content: Text(state.failure.message),
+        ),
+      );
     }
   }
 
   @override
-  @override
-  Widget build(BuildContext context) => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-            child: Text(
-              'Popular',
-              style: FontStyles.semiBold22,
+  Widget build(BuildContext context) =>
+      BlocListener<PopularMoviesBloc, PopularMoviesState>(
+        listener: (ctx, state) => listenToPopularMoviesBloc(ctx, state),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+              child: Text(
+                'Popular',
+                style: FontStyles.semiBold22,
+              ),
             ),
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          Expanded(
-            child: PagedListView<int, String>(
-              pagingController: _pagingController,
-              itemExtent: 120,
-              builderDelegate: PagedChildBuilderDelegate<String>(
-                itemBuilder: (ctx, item, index) => GestureDetector(
-                  onTap: () => Navigator.of(ctx).pushNamed(rDetailsPage),
-                  child: const MovieWidget(),
+            const SizedBox(
+              height: 20,
+            ),
+            Expanded(
+              child: PagedListView<int, Movie>(
+                pagingController: _pagingController,
+                itemExtent: 120,
+                builderDelegate: PagedChildBuilderDelegate<Movie>(
+                  itemBuilder: (ctx, movie, _) => MovieWidget(movie: movie),
+                  firstPageErrorIndicatorBuilder: (_) => MoviesListError(
+                      onTryAgain: () =>
+                          _pagingController.retryLastFailedRequest()),
+                  newPageErrorIndicatorBuilder: (_) => MoviesListError(
+                      onTryAgain: () =>
+                          _pagingController.retryLastFailedRequest()),
+                  firstPageProgressIndicatorBuilder: (_) => const Center(
+                    child: CircularProgressIndicator.adaptive(
+                      strokeWidth: 1.4,
+                    ),
+                  ),
+                  newPageProgressIndicatorBuilder: (_) => const Center(
+                    child: CircularProgressIndicator.adaptive(
+                      strokeWidth: 1.4,
+                    ),
+                  ),
+                  noItemsFoundIndicatorBuilder: (_) =>
+                      MoviesListNoItemsMessage.noItemsFound(),
+                  noMoreItemsIndicatorBuilder: (_) =>
+                      MoviesListNoItemsMessage.noMoreItems(),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       );
 }

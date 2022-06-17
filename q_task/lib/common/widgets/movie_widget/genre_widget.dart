@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 
 import '../../constants/colors.dart';
-import '../../constants/fonts.dart';
 
 class GenreWidget extends StatelessWidget {
-  const GenreWidget({super.key, required this.name});
+  const GenreWidget(
+      {super.key,
+      required this.name,
+      required this.textStyle,
+      required this.textHorizontalPadding});
   final String name;
+  final TextStyle textStyle;
+  final double textHorizontalPadding;
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +22,7 @@ class GenreWidget extends StatelessWidget {
       ),
       child: Text(
         name,
-        style: FontStyles.regular11,
+        style: textStyle,
       ),
     );
   }

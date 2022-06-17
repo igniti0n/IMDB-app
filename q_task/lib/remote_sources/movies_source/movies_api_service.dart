@@ -6,14 +6,14 @@ import '../../common/network/flavor_config.dart';
 import '../../common/network/log_interceptor.dart';
 import 'movies_client.dart';
 
-abstract class DevicesApiService {
+abstract class MoviesApiService {
   MoviesClient get moviesClient;
 }
 
-@Injectable(as: DevicesApiService)
-class DevicesApiServiceImpl implements DevicesApiService {
-  DevicesApiServiceImpl(this._flavorConfig) {
-    setUpServices();
+@Injectable(as: MoviesApiService)
+class MoviesApiServiceImpl implements MoviesApiService {
+  MoviesApiServiceImpl(this._flavorConfig) {
+    _setUpServices();
   }
   final FlavorConfig _flavorConfig;
   late final Dio _restDio;
@@ -37,7 +37,7 @@ class DevicesApiServiceImpl implements DevicesApiService {
     });
   }
 
-  void setUpServices() {
+  void _setUpServices() {
     _restDio = Dio(
       BaseOptions(baseUrl: _flavorConfig.getBaseUrl(), headers: {
         'Content-Type': 'application/json',

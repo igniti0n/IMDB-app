@@ -1,8 +1,10 @@
 import 'package:retrofit/retrofit.dart';
 import 'package:dio/dio.dart';
 
-import '../../common/models/genre_model/genre.dart';
-import '../../common/models/movie_model/movie.dart';
+import '../../common/models/genre/genre.dart';
+import '../models/movie_dto/movie_dto.dart';
+import '../models/genres_respnse/genres_response.dart';
+import '../models/movies_response/movies_response.dart';
 
 part 'movies_client.g.dart';
 
@@ -11,11 +13,11 @@ abstract class MoviesClient {
   factory MoviesClient(Dio dio, {String baseUrl}) = _MoviesClient;
 
   @GET('/movie/popular')
-  Future<List<Movie>> getMovies(
+  Future<MoviesResponse> getMovies(
     @Query('language') String language,
-    @Query('page') int thingName,
+    @Query('page') int pageNumber,
   );
 
   @GET('/genre/movie/list')
-  Future<List<Genre>> getGenres();
+  Future<GenresResponse> getGenres();
 }
