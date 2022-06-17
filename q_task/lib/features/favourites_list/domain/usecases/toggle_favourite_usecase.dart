@@ -1,11 +1,8 @@
-import 'dart:ffi';
-
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../common/errors/exception_to_failure_mapper.dart';
 import '../../../../common/errors/failures.dart';
-import '../../../../common/utils/dev_utils.dart';
 import '../../../../common/utils/usecase.dart';
 import '../../../../common/models/movie/movie.dart';
 import '../repositories/favourites_repository.dart';
@@ -24,7 +21,6 @@ class ToggleFavouriteUsecase
           params.movie, params.isFavuorite);
       return Right(newFavourites);
     } catch (exception) {
-      safeLog('Exception: ' + exception.toString());
       return Left(ExceptionToFailureMapper.mapExceptionToFailure(
           exception.runtimeType));
     }

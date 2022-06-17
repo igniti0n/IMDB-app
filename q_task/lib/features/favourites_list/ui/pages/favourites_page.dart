@@ -15,7 +15,7 @@ class FavouritesPage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Text(
               'Favourites',
               style: FontStyles.semiBold22,
@@ -27,6 +27,7 @@ class FavouritesPage extends StatelessWidget {
           Expanded(child: BlocBuilder<FavouritesBloc, FavouritesState>(
             builder: (_, favouriteMoviesState) {
               return ImplicitlyAnimatedList<Movie>(
+                insertAnimation: (context, child, animation) => child,
                 itemData: favouriteMoviesState.favouriteMovies,
                 itemBuilder: (context, movie) => ConstrainedBox(
                     constraints:

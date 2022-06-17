@@ -3,10 +3,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
+
 import '../../../../common/constants/fonts.dart';
 import '../../../../common/errors/exception_to_failure_mapper.dart';
 import '../../../../common/errors/exceptions.dart';
-import '../../../../common/utils/dev_utils.dart';
 import '../../../../common/widgets/movie_widget/movie_widget.dart';
 import '../blocs/bloc/popular_movies_bloc.dart';
 import '../../../../common/models/movie/movie.dart';
@@ -38,42 +38,8 @@ class _MoviesPageState extends State<MoviesPage> {
   @override
   void dispose() {
     _pagingController.dispose();
+    _internetConnectionSubscription.cancel();
     super.dispose();
-  }
-
-  void listenToInternetConnectionChanges() {
-    _internetConnectionSubscription =
-        BlocProvider.of<PopularMoviesBloc>(context)
-            .internetConnectionState
-            .listen((bool isConnected) {
-      safeLog('!!!! Is connected: $isConnected  !!!!');
-      if (isConnected) {
-        _pagingController.retryLastFailedRequest();
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(ExceptionToFailureMapper.mapExceptionToFailure(
-                    NoInternetException())
-                .message),
-          ),
-        );
-      }
-    });
-  }
-
-  void listenToPopularMoviesBloc(BuildContext ctx, PopularMoviesState state) {
-    if (state is PopularMoviesLoaded) {
-      final nextPageKey = _pagingController.nextPageKey ?? 0;
-      _pagingController.appendPage(
-          state.movies, nextPageKey + state.movies.length);
-    } else if (state is PopularMoviesError) {
-      _pagingController.error = state.failure;
-      ScaffoldMessenger.of(ctx).showSnackBar(
-        SnackBar(
-          content: Text(state.failure.message),
-        ),
-      );
-    }
   }
 
   @override
@@ -125,4 +91,38 @@ class _MoviesPageState extends State<MoviesPage> {
           ],
         ),
       );
+
+  void listenToInternetConnectionChanges() {
+    _internetConnectionSubscription =
+        BlocProvider.of<PopularMoviesBloc>(context)
+            .internetConnectionState
+            .listen((bool isConnected) {
+      if (isConnected) {
+        _pagingController.retryLastFailedRequest();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(ExceptionToFailureMapper.mapExceptionToFailure(
+                    NoInternetException())
+                .message),
+          ),
+        );
+      }
+    });
+  }
+
+  void listenToPopularMoviesBloc(BuildContext ctx, PopularMoviesState state) {
+    if (state is PopularMoviesLoaded) {
+      final nextPageKey = _pagingController.nextPageKey ?? 0;
+      _pagingController.appendPage(
+          state.movies, nextPageKey + state.movies.length);
+    } else if (state is PopularMoviesError) {
+      _pagingController.error = state.failure;
+      ScaffoldMessenger.of(ctx).showSnackBar(
+        SnackBar(
+          content: Text(state.failure.message),
+        ),
+      );
+    }
+  }
 }

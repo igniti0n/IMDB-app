@@ -12,15 +12,6 @@ abstract class HiveWrapper {
 
 @LazySingleton(as: HiveWrapper)
 class HiveWrapperImpl implements HiveWrapper {
-  HiveWrapperImpl() {
-    initHive();
-  }
-
-  Future<void> initHive() async {
-    final appDirectory = await getApplicationDocumentsDirectory();
-    Hive.init(appDirectory.path);
-  }
-
   @override
   Future<Box> openBox(String boxName) async {
     final Uint8List encryptionKey = await _getEncryptionKey();
@@ -29,7 +20,7 @@ class HiveWrapperImpl implements HiveWrapper {
   }
 
   Future<Uint8List> _getEncryptionKey() async {
-    FlutterSecureStorage secureStorage = const FlutterSecureStorage();
+    const FlutterSecureStorage secureStorage = FlutterSecureStorage();
     final encryptionKey = await secureStorage.read(key: 'secure_key');
     if (encryptionKey == null) {
       await secureStorage.write(

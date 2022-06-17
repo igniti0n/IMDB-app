@@ -14,7 +14,6 @@ class MovieDetailsCustomBar extends StatelessWidget
     return IntrinsicHeight(
       child: Container(
         padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-        //constraints: BoxConstraints.tight(const Size(double.infinity, 138)),
         transform: Matrix4.translationValues(0, 10, 0),
         decoration: const BoxDecoration(
           color: AppColors.qBackground,

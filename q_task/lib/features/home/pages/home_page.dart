@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart' show SvgPicture;
 
 import '../../../common/constants/colors.dart';
@@ -20,7 +19,7 @@ class HomePage extends StatelessWidget {
         bottomOpacity: 0,
         elevation: 0,
         leading: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
+          padding: const EdgeInsets.only(left: 20),
           child: ConstrainedBox(
             constraints: BoxConstraints.tight(const Size(28, 28)),
             child: SvgPicture.asset(
